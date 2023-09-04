@@ -10,6 +10,8 @@ import (
 	"sync"
 
 	"github.com/shohitomi/goblueprints/trace"
+	"github.com/stretchr/gomniauth"
+	"github.com/stretchr/gomniauth/providers/google"
 )
 
 type templateHandler struct {
@@ -27,7 +29,17 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	var addr = flag.String("addr", ":8080", "アプリケーションのアドレス")
+	var secretKey = flag.String("skey", "", "セキュリティキー")
+	var googleClientID = flag.String("google-cid", "", "Google クライアントID")
+	var googleClientSecret = flag.String("google-cs", "", "Google クライアントシークレット")
+
 	flag.Parse()
+
+	gomniauth.SetSecurityKey(*secretKey)
+	gomniauth.WithProviders(
+		google.New(*googleClientID, *googleClientSecret, "http://localhost:8080/auth/callback/google"),
+	)
+
 	r := newRoom()
 	r.tracer = trace.New(os.Stdout)
 	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
