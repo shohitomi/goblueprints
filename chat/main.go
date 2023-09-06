@@ -64,6 +64,7 @@ func main() {
 		w.WriteHeader(http.StatusTemporaryRedirect)
 	})
 	http.HandleFunc("/auth/", loginHandler)
+	http.Handle("/upload", &templateHandler{filename: "upload.html"})
 	http.Handle("/room", r)
 	// get the room going
 	go r.run()
