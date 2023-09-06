@@ -31,9 +31,9 @@ func TestGravatarAvatar(t *testing.T) {
 	}
 	url, err := gravatarAvatar.AvatarURL(client)
 	if err != nil {
-		t.Error("GravatarAvatar.GetAvatarURL should not return an error")
+		t.Error("GravatarAvatar.AvatarURL should not return an error")
 	}
 	if url != "//www.gravatar.com/avatar/0bc83cb571cd1c50ba6f3e8a78ef1346" {
-		t.Errorf("GravatarAvatar.GetAvatarURL wrongly returned %s", url)
+		t.Errorf("GravatarAvatar.AvatarURL wrongly returned %s", url)
 	}
 }
