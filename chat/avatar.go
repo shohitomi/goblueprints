@@ -12,6 +12,17 @@ type Avatar interface {
 	AvatarURL(ChatUser) (string, error)
 }
 
+type TryAvatars []Avatar
+
+func (a TryAvatars) AvatarURL(u ChatUser) (string, error) {
+	for _, avatar := range a {
+		if url, err := avatar.AvatarURL(u); err == nil {
+			return url, nil
+		}
+	}
+	return "", ErrNoAvatarURL
+}
+
 type AuthAvatar struct{}
 
 var UseAuthAvatar AuthAvatar
