@@ -9,9 +9,7 @@ func TestAuthAvatar(t *testing.T) {
 	client := new(client)
 	url, err := authAvatar.AvatarURL(client)
 	if err != ErrNoAvatarURL {
-		if err != ErrNoAvatarURL {
-			t.Error("AuthAvatar.AvatarURL should return ErrNoAvatarURL when no value present")
-		}
+		t.Error("AuthAvatar.AvatarURL should return ErrNoAvatarURL when no value present")
 	}
 
 	testUrl := "http://url-to-avatar/"
