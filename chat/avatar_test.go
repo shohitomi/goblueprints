@@ -4,19 +4,25 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	gomniauthtest "github.com/stretchr/gomniauth/test"
 )
 
 func TestAuthAvatar(t *testing.T) {
 	var authAvatar AuthAvatar
-	client := new(client)
-	_, err := authAvatar.AvatarURL(client)
+	testUser := &gomniauthtest.TestUser{}
+	testUser.On("AvatarURL").Return("", ErrNoAvatarURL)
+	testChatUser := &chatUser{User: testUser}
+	_, err := authAvatar.AvatarURL(testChatUser)
 	if err != ErrNoAvatarURL {
 		t.Error("AuthAvatar.AvatarURL should return ErrNoAvatarURL when no value present")
 	}
 
 	testUrl := "http://url-to-avatar/"
-	client.userData = map[string]interface{}{"avatar_url": testUrl}
-	url, err := authAvatar.AvatarURL(client)
+	testUser = &gomniauthtest.TestUser{}
+	testChatUser.User = testUser
+	testUser.On("AvatarURL").Return(testUrl, nil)
+	url, err := authAvatar.AvatarURL(testChatUser)
 	if err != nil {
 		t.Error("AuthAvatar.AvatarURL should return no error when value present")
 	}
@@ -27,15 +33,12 @@ func TestAuthAvatar(t *testing.T) {
 
 func TestGravatarAvatar(t *testing.T) {
 	var gravatarAvatar GravatarAvatar
-	client := new(client)
-	client.userData = map[string]interface{}{
-		"userid": "0bc83cb571cd1c50ba6f3e8a78ef1346",
-	}
-	url, err := gravatarAvatar.AvatarURL(client)
+	user := &chatUser{uniqueID: "abc"}
+	url, err := gravatarAvatar.AvatarURL(user)
 	if err != nil {
 		t.Error("GravatarAvatar.AvatarURL should not return an error")
 	}
-	if url != "//www.gravatar.com/avatar/0bc83cb571cd1c50ba6f3e8a78ef1346" {
+	if url != "//www.gravatar.com/avatar/abc" {
 		t.Errorf("GravatarAvatar.AvatarURL wrongly returned %s", url)
 	}
 }
@@ -46,9 +49,8 @@ func TestFileSystemAvatar(t *testing.T) {
 	defer func() { os.Remove(filename) }()
 
 	var fileSystemAvatar FileSystemAvatar
-	client := new(client)
-	client.userData = map[string]interface{}{"userid": "abc"}
-	url, err := fileSystemAvatar.AvatarURL(client)
+	user := &chatUser{uniqueID: "abc"}
+	url, err := fileSystemAvatar.AvatarURL(user)
 	if err != nil {
 		t.Error("FileSystemAvatar.AvatarURL should not return an error")
 	}

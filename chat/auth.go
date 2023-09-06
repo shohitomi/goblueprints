@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/stretchr/gomniauth"
+	gomniauthcommon "github.com/stretchr/gomniauth/common"
 	"github.com/stretchr/objx"
 )
 
@@ -66,15 +67,19 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatalln("Error when trying to get user", provider, "-", err)
 		}
 
+		chatUser := &chatUser{User: user}
 		m := md5.New()
 		io.WriteString(m, strings.ToLower(user.Name()))
-		userID := fmt.Sprintf("%x", m.Sum(nil))
+		chatUser.uniqueID = fmt.Sprintf("%x", m.Sum(nil))
+		avatarURL, err := avatars.AvatarURL(chatUser)
+		if err != nil {
+			log.Fatalln("Error when trying to AvatarURL", "-", err)
+		}
 
 		authCookieValue := objx.New(map[string]interface{}{
-			"userid":     userID,
+			"userid":     chatUser.uniqueID,
 			"name":       user.Name(),
-			"avatar_url": user.AvatarURL(),
-			"email":      user.Email(),
+			"avatar_url": avatarURL,
 		}).MustBase64()
 
 		http.SetCookie(w, &http.Cookie{
@@ -90,4 +95,18 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, "Auth action %s not supported", action)
 	}
+}
+
+type ChatUser interface {
+	UniqueID() string
+	AvatarURL() string
+}
+
+type chatUser struct {
+	gomniauthcommon.User
+	uniqueID string
+}
+
+func (u *chatUser) UniqueID() string {
+	return u.uniqueID
 }
