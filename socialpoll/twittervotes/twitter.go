@@ -42,7 +42,7 @@ func closeConn() {
 
 var (
 	authClient *oauth.Client
-	creds      *oauth.Credential
+	creds      *oauth.Credentials
 )
 
 func setupTwitterAuth() {
